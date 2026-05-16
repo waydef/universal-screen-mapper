@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Screen Defect Mapper</title>
+    
+    <!-- Подключаем стильные футуристичные шрифты -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-darkest: #07080a;
+            --bg-card: rgba(15, 18, 24, 0.75);
+            --bg-card-hover: rgba(22, 28, 38, 0.85);
+            --border-color: rgba(102, 252, 241, 0.15);
+            --border-color-glow: rgba(102, 252, 241, 0.4);
+            
+            /* Неоновые акценты */
+            --cyan: #66FCF1;
+            --cyan-dim: rgba(102, 252, 241, 0.3);
+            --pink: #ff007f;
+            --pink-dim: rgba(255, 0, 127, 0.2);
+            --pink-glow: rgba(255, 0, 127, 0.4);
+            --yellow: #f1c40f;
+            
+            --text-primary: #f5f7fa;
+            --text-secondary: #95a5a6;
+            --text-muted: #5e6b6d;
+            
+            --font-main: 'Space Grotesk', sans-serif;
+            --font-mono: 'Share Tech Mono', monospace;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-darkest);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(102, 252, 241, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(255, 0, 127, 0.03) 0px, transparent 50%);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+        }
+
+        /* Кастомный красивый скроллбар */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-darkest);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(102, 252, 241, 0.2);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--cyan);
+        }
+
+        header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(102, 252, 241, 0.08);
+            background: rgba(7, 8, 10, 0.8);
+            backdrop-filter: blur(12px);
+            z-index: 10;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            color: var(--cyan);
+            filter: drop-shadow(0 0 8px var(--cyan-dim));
+            animation: pulse 3s infinite ease-in-out;
+        }
+
+        .logo-text h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #fff, var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-text span {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            letter-spacing: 0.5px;
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--cyan);
+            box-shadow: 0 0 8px var(--cyan);
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        .status-dot.drawing {
+            background-color: var(--pink);
+            box-shadow: 0 0 8px var(--pink);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 2rem;
+            max-width: 1800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Боковая панель управления */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(16px);
+            transition: var(--transition);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .card:hover {
+            background: var(--bg-card-hover);
+            border-color: rgba(102, 252, 241, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(102, 252, 241, 0.05);
+        }
+
+        .card h2 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-left: 3px solid var(--cyan);
+            padding-left: 0.75rem;
+        }
+
+        /* Пресеты и разрешения */
+        .grid-presets {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .btn-preset {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            padding: 0.6rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .btn-preset:hover, .btn-preset.active {
+            background: rgba(102, 252, 241, 0.08);
+            border-color: var(--cyan);
+            color: var(--cyan);
+            box-shadow: 0 0 10px rgba(102, 252, 241, 0.1);
+        }
+
+        .custom-res-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+
+        .custom-res-group input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            text-align: center;
+            outline: none;
+        }
+
+        .custom-res-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .custom-res-group span {
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        /* Управление контуром */
+        .actions-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            font-family: var(--font-main);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--cyan);
+            border: 1px solid var(--cyan);
+            color: var(--bg-darkest);
+            box-shadow: 0 0 15px rgba(102, 252, 241, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: #7ffff8;
+            box-shadow: 0 0 25px rgba(102, 252, 241, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-danger {
+            background: rgba(255, 0, 127, 0.05);
+            border: 1px solid rgba(255, 0, 127, 0.2);
+            color: var(--pink);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: rgba(255, 0, 127, 0.12);
+            border-color: var(--pink);
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.2);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Интерактивный лог координат */
+        .coords-log {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-height: 380px;
+        }
+
+        .coords-table-wrapper {
+            overflow-y: auto;
+            flex: 1;
+            margin-top: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 0.6rem 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--cyan);
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+            color: #fff;
+        }
+
+        .empty-log {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            gap: 0.5rem;
+            padding: 2rem 0;
+        }
+
+        /* Центральная область холста */
+        .workspace {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: 100%;
+            min-height: 600px;
+        }
+
+        .canvas-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(16px);
+        }
+
+        /* Оболочка виртуального монитора */
+        .monitor-wrapper {
+            position: relative;
+            background: #000;
+            border: 12px solid #1a222d;
+            border-radius: 12px;
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                0 0 40px rgba(102, 252, 241, 0.03);
+            transition: aspect-ratio var(--transition), width var(--transition), height var(--transition);
+            max-width: 100%;
+            max-height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .monitor-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -14px;
+            left: -14px;
+            right: -14px;
+            bottom: -14px;
+            border: 2px solid rgba(102, 252, 241, 0.1);
+            border-radius: 14px;
+            pointer-events: none;
+        }
+
+        /* Холст отрисовки */
+        canvas {
+            display: block;
+            background-color: #030406;
+            cursor: crosshair;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Панель подсказок внизу */
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid rgba(102, 252, 241, 0.08);
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .controls-info {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .key-badge {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            padding: 0.1rem 0.4rem;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--cyan);
+        }
+
+        /* Стили для ПОЛНОЭКРАННОГО режима */
+        body.fullscreen-active {
+            background: #000 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            overflow: hidden !important;
+        }
+
+        body.fullscreen-active header,
+        body.fullscreen-active .sidebar,
+        body.fullscreen-active .info-bar {
+            display: none !important;
+        }
+
+        body.fullscreen-active main {
+            grid-template-columns: 1fr !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            max-width: 100vw !important;
+            height: 100vh !important;
+        }
+
+        body.fullscreen-active .canvas-section {
+            border: none !important;
+            border-radius: 0 !important;
+            padding: 0 !important;
+            background: #000 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            backdrop-filter: none !important;
+        }
+
+        body.fullscreen-active .monitor-wrapper {
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            width: 100vw !important;
+            height: 100vh !important;
+        }
+
+        body.fullscreen-active .monitor-wrapper::before {
+            display: none !important;
+        }
+
+        /* Плавающий индикатор закрытия фуллскрина */
+        .exit-fullscreen-btn {
+            display: none;
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(15, 18, 24, 0.85);
+            border: 1px solid var(--pink);
+            color: var(--pink);
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-family: var(--font-main);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 9999;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(255, 0, 127, 0.2);
+            transition: var(--transition);
+        }
+
+        body.fullscreen-active .exit-fullscreen-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .exit-fullscreen-btn:hover {
+            background: var(--pink);
+            color: #fff;
+            box-shadow: 0 0 25px rgba(255, 0, 127, 0.5);
+            transform: translateY(-1px);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.98); }
+            100% { opacity: 0.8; transform: scale(1); }
+        }
+
+        /* Адаптивность для мобильных телефонов */
+        @media (max-width: 992px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                order: 2;
+            }
+            .workspace {
+                order: 1;
+                min-height: 450px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-section">
+            <svg class="logo-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="m16.2 7.8-8.4 8.4"></path>
+                <path d="M12 2v4"></path>
+                <path d="M12 18v4"></path>
+                <path d="M4 12h4"></path>
+                <path d="M16 12h4"></path>
+            </svg>
+            <div class="logo-text">
+                <h1>SCREEN DEFECT MAPPER</h1>
+                <span>STATUS: STABLE_INTELLIGENCE</span>
+            </div>
+        </div>
+        <div class="system-status">
+            <div class="status-item">
+                <span class="status-dot" id="state-dot"></span>
+                <span id="state-text">ОЖИДАНИЕ</span>
+            </div>
+            <div class="status-item">
+                <span>ПРОПОРЦИЯ: </span>
+                <span id="ratio-badge" style="font-family: var(--font-mono); color: var(--cyan);">16:9</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Боковая панель -->
+        <section class="sidebar">
+            <!-- Блок Разрешения -->
+            <div class="card">
+                <h2>📐 Разрешение экрана</h2>
+                <div class="grid-presets">
+                    <button class="btn-preset active" data-w="1920" data-h="1080" data-ratio="16:9">1920x1080</button>
+                    <button class="btn-preset" data-w="2560" data-h="1440" data-ratio="16:9">2560x1440</button>
+                    <button class="btn-preset" data-w="3440" data-h="1440" data-ratio="21:9">3440x1440</button>
+                    <button class="btn-preset" data-w="5120" data-h="1440" data-ratio="32:9">5120x1440</button>
+                    <button class="btn-preset" data-w="1080" data-h="2400" data-ratio="20:9">1080x2400</button>
+                    <button class="btn-preset" data-w="1179" data-h="2556" data-ratio="19.5:9">1179x2556</button>
+                </div>
+                <div class="custom-res-group">
+                    <input type="number" id="custom-w" placeholder="Ширина" value="1920">
+                    <span>×</span>
+                    <input type="number" id="custom-h" placeholder="Высота" value="1080">
+                </div>
+            </div>
+
+            <!-- Блок Действий -->
+            <div class="card">
+                <h2>🛠️ Управление</h2>
+                <div class="actions-vertical">
+                    <button class="btn-action btn-primary" id="btn-fullscreen">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 3 6 6-6-6Zm6 0v6-6Zm0 0-6 6 6-6ZM9 21l-6-6 6 6Zm-6 0v-6 6Zm0 0 6-6-6 6ZM3 9l6-6-6 6Zm0-6v6-6Zm0 0 6 6-6-6Zm18 12-6 6 6-6Zm0 6v-6 6Zm0 0-6-6 6 6Z"/></svg>
+                        На весь экран (1:1)
+                    </button>
+                    <button class="btn-action btn-secondary" id="btn-close-loop" disabled>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"/><path d="m9 12 2 2 4-4"/></svg>
+                        Замкнуть контур
+                    </button>
+                    <button class="btn-action btn-secondary" id="btn-undo" disabled>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+                        Отменить точку
+                    </button>
+                    <button class="btn-action btn-danger" id="btn-clear">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        Очистить всё
+                    </button>
+                </div>
+            </div>
+
+            <!-- Блок экспорта / Лог координат -->
+            <div class="card coords-log">
+                <h2>📋 Векторные точки</h2>
+                <div class="coords-table-wrapper">
+                    <table id="points-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>X (px)</th>
+                                <th>Y (px)</th>
+                                <th>Связь</th>
+                            </tr>
+                        </thead>
+                        <tbody id="points-tbody">
+                            <!-- Заполняется динамически -->
+                        </tbody>
+                    </table>
+                    <div class="empty-log" id="empty-table-view">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                        <span>Нажмите на экран для замера</span>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                    <button class="btn-action btn-secondary" id="btn-export-json" style="font-size: 0.8rem; padding: 0.5rem;" disabled>Копировать JSON</button>
+                    <button class="btn-action btn-secondary" id="btn-export-csv" style="font-size: 0.8rem; padding: 0.5rem;" disabled>CSV</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Рабочее пространство -->
+        <section class="workspace">
+            <div class="canvas-section" id="canvas-container">
+                <button class="exit-fullscreen-btn" id="btn-exit-fullscreen">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    Выйти из полного экрана
+                </button>
+                <div class="monitor-wrapper" id="monitor-frame">
+                    <canvas id="calibration-canvas"></canvas>
+                </div>
+            </div>
+            
+            <div class="info-bar">
+                <div class="controls-info">
+                    <div><span class="key-badge">ЛКМ / Тап</span> Поставить точку</div>
+                    <div><span class="key-badge">Клик у старта</span> Замкнуть контур</div>
+                    <div><span class="key-badge">F11 / Esc</span> Выйти из режима 1:1</div>
+                </div>
+                <div style="font-family: var(--font-mono); color: var(--text-secondary);" id="realtime-coords">
+                    X: 0000 | Y: 0000
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Инициализация элементов DOM
+        const canvas = document.getElementById('calibration-canvas');
+        const ctx = canvas.getContext('2d');
+        const monitorFrame = document.getElementById('monitor-frame');
+        const canvasContainer = document.getElementById('canvas-container');
+        const ratioBadge = document.getElementById('ratio-badge');
+        
+        // Вводы разрешений
+        const inputW = document.getElementById('custom-w');
+        const inputH = document.getElementById('custom-h');
+        const presetBtns = document.querySelectorAll('.btn-preset');
+        
+        // Кнопки управления
+        const btnFullscreen = document.getElementById('btn-fullscreen');
+        const btnExitFullscreen = document.getElementById('btn-exit-fullscreen');
+        const btnCloseLoop = document.getElementById('btn-close-loop');
+        const btnUndo = document.getElementById('btn-undo');
+        const btnClear = document.getElementById('btn-clear');
+        const btnExportJson = document.getElementById('btn-export-json');
+        const btnExportCsv = document.getElementById('btn-export-csv');
+        
+        // Тексты статусов
+        const stateDot = document.getElementById('state-dot');
+        const stateText = document.getElementById('state-text');
+        const realtimeCoordsText = document.getElementById('realtime-coords');
+        
+        // Таблица
+        const pointsTbody = document.getElementById('points-tbody');
+        const emptyTableView = document.getElementById('empty-table-view');
+
+        // Глобальное состояние
+        let virtualWidth = 1920;
+        let virtualHeight = 1080;
+        
+        let completedPolygons = []; // Содержит массивы точек для замкнутых многоугольников: [ [{x, y}, ...], ... ]
+        let currentPoints = [];     // Массив точек текущего (незавершенного) контура: [ {x, y}, ... ]
+        
+        let mouseX = 0;
+        let mouseY = 0;
+        let isHovering = false;
+
+        // Инициализация размеров и рендеринга
+        function initDimensions() {
+            virtualWidth = parseInt(inputW.value) || 1920;
+            virtualHeight = parseInt(inputH.value) || 1080;
+            
+            // Расчет пропорций
+            const gcd = (a, b) => b ? gcd(b, a % b) : a;
+            const divisor = gcd(virtualWidth, virtualHeight);
+            const ratioW = virtualWidth / divisor;
+            const ratioH = virtualHeight / divisor;
+            
+            // Если отношение слишком дробное, показываем округленные стандартные
+            let ratioString = `${ratioW}:${ratioH}`;
+            if (ratioW > 50 || ratioH > 50) {
+                const decimal = (virtualWidth / virtualHeight).toFixed(2);
+                if (decimal === "1.78") ratioString = "16:9";
+                else if (decimal === "2.33") ratioString = "21:9";
+                else if (decimal === "3.56") ratioString = "32:9";
+                else ratioString = `~${decimal}:1`;
+            }
+            ratioBadge.textContent = ratioString;
+            
+            // Выставляем пропорции и размеры для монитора
+            monitorFrame.style.aspectRatio = `${virtualWidth} / ${virtualHeight}`;
+            
+            // Выставляем разрешение холста 1:1
+            canvas.width = virtualWidth;
+            canvas.height = virtualHeight;
+            
+            updateCanvasContainerSize();
+            redraw();
+        }
+
+        // Адаптивное масштабирование контейнера с рамкой монитора
+        function updateCanvasContainerSize() {
+            const containerW = canvasContainer.clientWidth - 64; // с учетом отступов
+            const containerH = canvasContainer.clientHeight - 64;
+            
+            const containerRatio = containerW / containerH;
+            const monitorRatio = virtualWidth / virtualHeight;
+            
+            if (monitorRatio > containerRatio) {
+                monitorFrame.style.width = `${containerW}px`;
+                monitorFrame.style.height = 'auto';
+            } else {
+                monitorFrame.style.width = 'auto';
+                monitorFrame.style.height = `${containerH}px`;
+            }
+        }
+
+        // Логика пересчета физических координат мыши на холсте в виртуальные пиксели
+        function getCanvasCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            
+            // Масштабируем с учетом реального разрешения холста
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            const x = Math.round((e.clientX - rect.left) * scaleX);
+            const y = Math.round((e.clientY - rect.top) * scaleY);
+            
+            // Ограничиваем рамками холста
+            return {
+                x: Math.max(0, Math.min(virtualWidth, x)),
+                y: Math.max(0, Math.min(virtualHeight, y))
+            };
+        }
+
+        // Проверка дистанции между двумя точками
+        function getDistance(p1, p2) {
+            return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
+        }
+
+        // Отрисовка
+        function redraw() {
+            // Очищаем экран
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Сетка пикселей (тонкие линии)
+            ctx.strokeStyle = 'rgba(102, 252, 241, 0.03)';
+            ctx.lineWidth = 1;
+            const gridSpacing = 80;
+            
+            ctx.beginPath();
+            for (let x = 0; x < canvas.width; x += gridSpacing) {
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+            }
+            for (let y = 0; y < canvas.height; y += gridSpacing) {
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+            }
+            ctx.stroke();
+
+            // 1. Отрисовка завершенных замкнутых многоугольников
+            completedPolygons.forEach((poly, index) => {
+                if (poly.length === 0) return;
+                
+                ctx.beginPath();
+                ctx.moveTo(poly[0].x, poly[0].y);
+                for (let i = 1; i < poly.length; i++) {
+                    ctx.lineTo(poly[i].x, poly[i].y);
+                }
+                ctx.closePath();
+                
+                // Заливка неоновым коралловым
+                ctx.fillStyle = 'rgba(255, 0, 127, 0.15)';
+                ctx.fill();
+                
+                // Граница
+                ctx.strokeStyle = '#ff007f';
+                ctx.lineWidth = 3;
+                ctx.shadowColor = 'rgba(255, 0, 127, 0.5)';
+                ctx.shadowBlur = 10;
+                ctx.stroke();
+                ctx.shadowBlur = 0; // сброс тени
+
+                // Опорные точки многоугольника
+                poly.forEach(p => {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fill();
+                    ctx.strokeStyle = '#ff007f';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                });
+            });
+
+            // 2. Отрисовка текущего незавершенного контура
+            if (currentPoints.length > 0) {
+                ctx.beginPath();
+                ctx.moveTo(currentPoints[0].x, currentPoints[0].y);
+                for (let i = 1; i < currentPoints.length; i++) {
+                    ctx.lineTo(currentPoints[i].x, currentPoints[i].y);
+                }
+                
+                // Если мышка на холсте, рисуем динамическую линию к курсору
+                if (isHovering && !document.body.classList.contains('fullscreen-active')) {
+                    ctx.lineTo(mouseX, mouseY);
+                }
+                
+                ctx.strokeStyle = '#66FCF1';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([4, 4]); // пунктир для строящейся линии
+                ctx.stroke();
+                ctx.setLineDash([]); // сброс пунктира
+                
+                // Опорные точки текущего контура
+                currentPoints.forEach((p, idx) => {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+                    
+                    // Самая первая точка светится неоном ярче (подсказка автозамыкания)
+                    if (idx === 0) {
+                        ctx.fillStyle = '#66FCF1';
+                        ctx.shadowColor = 'rgba(102, 252, 241, 0.8)';
+                        ctx.shadowBlur = 12;
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                        
+                        // Дополнительное кольцо вокруг стартовой точки
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, 12, 0, Math.PI * 2);
+                        ctx.strokeStyle = 'rgba(102, 252, 241, 0.3)';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    } else {
+                        ctx.fillStyle = '#1f2833';
+                        ctx.fill();
+                        ctx.strokeStyle = '#66FCF1';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                    }
+                });
+            }
+
+            // 3. Перекрестие под курсором (Crosshairs) для точности
+            if (isHovering && !document.body.classList.contains('fullscreen-active')) {
+                ctx.strokeStyle = 'rgba(102, 252, 241, 0.2)';
+                ctx.lineWidth = 0.75;
+                
+                // Вертикальная линия
+                ctx.beginPath();
+                ctx.moveTo(mouseX, 0);
+                ctx.lineTo(mouseX, canvas.height);
+                ctx.stroke();
+                
+                // Горизонтальная линия
+                ctx.beginPath();
+                ctx.moveTo(0, mouseY);
+                ctx.lineTo(canvas.width, mouseY);
+                ctx.stroke();
+
+                // Подсказка координат прямо у курсора
+                ctx.font = '12px Share Tech Mono';
+                ctx.fillStyle = '#66FCF1';
+                ctx.fillText(`X:${mouseX} Y:${mouseY}`, mouseX + 15, mouseY - 15);
+            }
+        }
+
+        // Замыкание текущей цепи в полноценный полигон
+        function closeActiveLoop() {
+            if (currentPoints.length < 3) return;
+            
+            completedPolygons.push([...currentPoints]);
+            currentPoints = [];
+            
+            updateControlsState();
+            updatePointsTable();
+            redraw();
+        }
+
+        // Обновление состояния кнопок и статусов
+        function updateControlsState() {
+            const hasCurrentPoints = currentPoints.length > 0;
+            const hasCompletedPolygons = completedPolygons.length > 0;
+            
+            btnCloseLoop.disabled = currentPoints.length < 3;
+            btnUndo.disabled = !hasCurrentPoints;
+            
+            btnExportJson.disabled = !hasCompletedPolygons && !hasCurrentPoints;
+            btnExportCsv.disabled = !hasCompletedPolygons && !hasCurrentPoints;
+            
+            if (hasCurrentPoints) {
+                stateDot.className = "status-dot drawing";
+                stateText.textContent = "РАЗМЕТКА КОНТУРА";
+            } else if (hasCompletedPolygons) {
+                stateDot.className = "status-dot";
+                stateText.textContent = `КАРТИРОВАНО (${completedPolygons.length})`;
+            } else {
+                stateDot.className = "status-dot";
+                stateText.textContent = "ОЖИДАНИЕ";
+            }
+        }
+
+        // Обновление таблицы точек
+        function updatePointsTable() {
+            pointsTbody.innerHTML = '';
+            
+            const totalElements = completedPolygons.reduce((acc, poly) => acc + poly.length, 0) + currentPoints.length;
+            
+            if (totalElements === 0) {
+                emptyTableView.style.display = 'flex';
+                return;
+            }
+            
+            emptyTableView.style.display = 'none';
+            let index = 1;
+            
+            // Вывод завершенных полигонов
+            completedPolygons.forEach((poly, polyIdx) => {
+                poly.forEach((p, ptIdx) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${index++}</td>
+                        <td>${p.x}</td>
+                        <td>${p.y}</td>
+                        <td style="color: var(--pink);">Фигура #${polyIdx + 1} (${ptIdx === 0 ? 'Старт' : 'Точка'})</td>
+                    `;
+                    pointsTbody.appendChild(tr);
+                });
+            });
+            
+            // Вывод текущих незавершенных точек
+            currentPoints.forEach((p, ptIdx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index++}</td>
+                    <td>${p.x}</td>
+                    <td>${p.y}</td>
+                    <td style="color: var(--cyan);">Активный путь (${ptIdx === 0 ? 'Старт' : 'Точка'})</td>
+                `;
+                pointsTbody.appendChild(tr);
+            });
+        }
+
+        // ОБРАБОТЧИКИ СОБЫТИЙ
+
+        // Клик по холсту (добавление точки / автозамыкание)
+        canvas.addEventListener('click', (e) => {
+            const coords = getCanvasCoordinates(e);
+            
+            // Проверяем автозамыкание: клик в радиусе 16 пикселей от первой точки
+            if (currentPoints.length >= 3) {
+                const startPoint = currentPoints[0];
+                
+                // Пересчитываем 16 пикселей в физический масштаб холста
+                const rect = canvas.getBoundingClientRect();
+                const threshold = 16 * (canvas.width / rect.width);
+                
+                if (getDistance(coords, startPoint) < threshold) {
+                    closeActiveLoop();
+                    return;
+                }
+            }
+            
+            // Добавляем точку
+            currentPoints.push(coords);
+            updateControlsState();
+            updatePointsTable();
+            redraw();
+        });
+
+        // Движение мыши над холстом
+        canvas.addEventListener('mousemove', (e) => {
+            const coords = getCanvasCoordinates(e);
+            mouseX = coords.x;
+            mouseY = coords.y;
+            isHovering = true;
+            
+            realtimeCoordsText.textContent = `X: ${String(mouseX).padStart(4, '0')} | Y: ${String(mouseY).padStart(4, '0')}`;
+            redraw();
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            isHovering = false;
+            redraw();
+        });
+
+        // Отмена последней точки
+        btnUndo.addEventListener('click', () => {
+            if (currentPoints.length > 0) {
+                currentPoints.pop();
+                updateControlsState();
+                updatePointsTable();
+                redraw();
+            }
+        });
+
+        // Замыкание контура кнопкой
+        btnCloseLoop.addEventListener('click', closeActiveLoop);
+
+        // Очистить всё
+        btnClear.addEventListener('click', () => {
+            if (confirm("Вы уверены, что хотите стереть все векторные данные разметки?")) {
+                currentPoints = [];
+                completedPolygons = [];
+                updateControlsState();
+                updatePointsTable();
+                redraw();
+            }
+        });
+
+        // Обработка пресетов разрешений
+        presetBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                presetBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                inputW.value = btn.dataset.w;
+                inputH.value = btn.dataset.h;
+                initDimensions();
+            });
+        });
+
+        // Кастомное изменение полей
+        [inputW, inputH].forEach(input => {
+            input.addEventListener('input', () => {
+                presetBtns.forEach(b => b.classList.remove('active'));
+                initDimensions();
+            });
+        });
+
+        // ЭКСПОРТ ДАННЫХ
+
+        // Генерация чистого JSON-структуры
+        function getDefectsData() {
+            return {
+                timestamp: new Date().toISOString(),
+                canvasSize: { width: virtualWidth, height: virtualHeight },
+                completedDefects: completedPolygons,
+                activeDraftPath: currentPoints
+            };
+        }
+
+        btnExportJson.addEventListener('click', () => {
+            const data = getDefectsData();
+            navigator.clipboard.writeText(JSON.stringify(data, null, 2))
+                .then(() => alert("Векторный JSON успешно скопирован в буфер обмена!"))
+                .catch(err => alert("Ошибка копирования: " + err));
+        });
+
+        btnExportCsv.addEventListener('click', () => {
+            let csvContent = "data:text/csv;charset=utf-8,Type,Index,X,Y\n";
+            
+            completedPolygons.forEach((poly, polyIdx) => {
+                poly.forEach((p, idx) => {
+                    csvContent += `Polygon_${polyIdx+1},${idx+1},${p.x},${p.y}\n`;
+                });
+            });
+            
+            currentPoints.forEach((p, idx) => {
+                csvContent += `DraftPath,${idx+1},${p.x},${p.y}\n`;
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `screen_defect_coordinates_${virtualWidth}x${virtualHeight}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // РЕЖИМ ПОЛНОГО ЭКРАНА (1:1 Калибровка)
+
+        function enterFullscreen() {
+            if (canvasContainer.requestFullscreen) {
+                canvasContainer.requestFullscreen();
+            } else if (canvasContainer.webkitRequestFullscreen) {
+                canvasContainer.webkitRequestFullscreen();
+            } else if (canvasContainer.msRequestFullscreen) {
+                canvasContainer.msRequestFullscreen();
+            }
+        }
+
+        function exitFullscreen() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        }
+
+        btnFullscreen.addEventListener('click', enterFullscreen);
+        btnExitFullscreen.addEventListener('click', exitFullscreen);
+
+        // Слушатель событий изменения состояния Fullscreen
+        document.addEventListener('fullscreenchange', onFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+        document.addEventListener('mozfullscreenchange', onFullscreenChange);
+        document.addEventListener('MSFullscreenChange', onFullscreenChange);
+
+        function onFullscreenChange() {
+            const isFullscreen = document.fullscreenElement || 
+                                 document.webkitFullscreenElement || 
+                                 document.mozFullScreenElement || 
+                                 document.msFullscreenElement;
+            
+            if (isFullscreen) {
+                document.body.classList.add('fullscreen-active');
+                
+                // В полноэкранном режиме растягиваем холст во весь экран без рамок рамки монитора
+                monitorFrame.style.width = '100vw';
+                monitorFrame.style.height = '100vh';
+                monitorFrame.style.aspectRatio = 'none';
+                
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            } else {
+                document.body.classList.remove('fullscreen-active');
+                
+                // Возвращаем стандартные размеры
+                initDimensions();
+            }
+            redraw();
+        }
+
+        // Перерасчет размеров при изменении окна
+        window.addEventListener('resize', () => {
+            if (!document.body.classList.contains('fullscreen-active')) {
+                updateCanvasContainerSize();
+                redraw();
+            }
+        });
+
+        // Инициализация при загрузке
+        initDimensions();
+    </script>
+</body>
+</html>
