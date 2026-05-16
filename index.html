@@ -386,6 +386,8 @@
             overflow: hidden;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(16px);
+            min-width: 0;
+            min-height: 0;
         }
 
         /* Оболочка виртуального монитора */
@@ -757,6 +759,10 @@
 
         // Адаптивное масштабирование контейнера с рамкой монитора
         function updateCanvasContainerSize() {
+            // Временно сжимаем рамку до 0, чтобы получить чистые размеры флекс-контейнера без влияния его детей
+            monitorFrame.style.width = '0px';
+            monitorFrame.style.height = '0px';
+            
             const containerW = canvasContainer.clientWidth - 64; // с учетом отступов
             const containerH = canvasContainer.clientHeight - 64;
             
@@ -765,9 +771,9 @@
             
             if (monitorRatio > containerRatio) {
                 monitorFrame.style.width = `${containerW}px`;
-                monitorFrame.style.height = 'auto';
+                monitorFrame.style.height = `${containerW / monitorRatio}px`;
             } else {
-                monitorFrame.style.width = 'auto';
+                monitorFrame.style.width = `${containerH * monitorRatio}px`;
                 monitorFrame.style.height = `${containerH}px`;
             }
         }
@@ -1158,6 +1164,30 @@
         document.addEventListener('mozfullscreenchange', onFullscreenChange);
         document.addEventListener('MSFullscreenChange', onFullscreenChange);
 
+        // Масштабирование всех точек при динамической смене разрешения
+        function scalePoints(oldW, oldH, newW, newH) {
+            if (oldW === newW && oldH === newH) return;
+            
+            const scaleX = newW / oldW;
+            const scaleY = newH / oldH;
+            
+            // Масштабируем активные незавершенные точки
+            currentPoints = currentPoints.map(p => ({
+                x: Math.round(p.x * scaleX),
+                y: Math.round(p.y * scaleY)
+            }));
+            
+            // Масштабируем завершенные многоугольники
+            completedPolygons = completedPolygons.map(poly => 
+                poly.map(p => ({
+                    x: Math.round(p.x * scaleX),
+                    y: Math.round(p.y * scaleY)
+                }))
+            );
+            
+            updatePointsTable();
+        }
+
         function onFullscreenChange() {
             const isFullscreen = document.fullscreenElement || 
                                  document.webkitFullscreenElement || 
@@ -1167,13 +1197,30 @@
             if (isFullscreen) {
                 document.body.classList.add('fullscreen-active');
                 
-                // В полноэкранном режиме растягиваем холст во весь экран без рамок рамки монитора
+                // Автоматически определяем физическое разрешение экрана для режима 1:1
+                const newW = window.screen.width || window.innerWidth;
+                const newH = window.screen.height || window.innerHeight;
+                
+                const oldW = virtualWidth;
+                const oldH = virtualHeight;
+                
+                virtualWidth = newW;
+                virtualHeight = newH;
+                inputW.value = newW;
+                inputH.value = newH;
+                
+                // Масштабируем координаты точек, чтобы они не растягивались и не сдвигались
+                scalePoints(oldW, oldH, newW, newH);
+                
+                // Сбрасываем активные пресеты, так как теперь используется физический экран
+                presetBtns.forEach(b => b.classList.remove('active'));
+                
                 monitorFrame.style.width = '100vw';
                 monitorFrame.style.height = '100vh';
                 monitorFrame.style.aspectRatio = 'none';
                 
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+                canvas.width = newW;
+                canvas.height = newH;
             } else {
                 document.body.classList.remove('fullscreen-active');
                 
