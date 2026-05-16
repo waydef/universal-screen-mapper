@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Universal Screen Defect Mapper</title>
     
-    <!-- Подключаем стильные футуристичные шрифты -->
+    <!-- fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -18,7 +18,7 @@
             --border-color: rgba(102, 252, 241, 0.15);
             --border-color-glow: rgba(102, 252, 241, 0.4);
             
-            /* Неоновые акценты */
+            /* neon theme */
             --cyan: #66FCF1;
             --cyan-dim: rgba(102, 252, 241, 0.3);
             --pink: #ff007f;
@@ -44,9 +44,7 @@
 
         body {
             background-color: var(--bg-darkest);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(102, 252, 241, 0.05) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(255, 0, 127, 0.03) 0px, transparent 50%);
+            background-image: \n                radial-gradient(at 0% 0%, rgba(102, 252, 241, 0.05) 0px, transparent 50%),\n                radial-gradient(at 100% 100%, rgba(255, 0, 127, 0.03) 0px, transparent 50%);
             color: var(--text-primary);
             font-family: var(--font-main);
             min-height: 100vh;
@@ -56,7 +54,7 @@
             transition: var(--transition);
         }
 
-        /* Кастомный красивый скроллбар */
+        /* scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -150,7 +148,7 @@
             margin: 0 auto;
         }
 
-        /* Боковая панель управления */
+        /* sidebar */
         .sidebar {
             display: flex;
             flex-direction: column;
@@ -187,7 +185,7 @@
             padding-left: 0.75rem;
         }
 
-        /* Пресеты и разрешения */
+        /* presets */
         .grid-presets {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -245,7 +243,7 @@
             font-family: var(--font-mono);
         }
 
-        /* Управление контуром */
+        /* controls */
         .actions-vertical {
             display: flex;
             flex-direction: column;
@@ -308,7 +306,7 @@
             cursor: not-allowed;
         }
 
-        /* Интерактивный лог координат */
+        /* logs */
         .coords-log {
             flex: 1;
             display: flex;
@@ -364,7 +362,7 @@
             padding: 2rem 0;
         }
 
-        /* Центральная область холста */
+        /* workspace */
         .workspace {
             display: flex;
             flex-direction: column;
@@ -390,15 +388,14 @@
             min-height: 0;
         }
 
-        /* Оболочка виртуального монитора */
+        /* monitor wrapper */
         .monitor-wrapper {
             position: relative;
             background: #000;
             border: 12px solid #1a222d;
             border-radius: 12px;
             box-shadow: 
-                0 25px 50px -12px rgba(0, 0, 0, 0.8),
-                0 0 40px rgba(102, 252, 241, 0.03);
+                0 25px 50px -12px rgba(0, 0, 0, 0.8),\n                0 0 40px rgba(102, 252, 241, 0.03);
             transition: aspect-ratio var(--transition), width var(--transition), height var(--transition);
             max-width: 100%;
             max-height: 100%;
@@ -419,7 +416,7 @@
             pointer-events: none;
         }
 
-        /* Холст отрисовки */
+        /* canvas */
         canvas {
             display: block;
             background-color: #030406;
@@ -428,7 +425,7 @@
             height: 100%;
         }
 
-        /* Панель подсказок внизу */
+        /* footer */
         .info-bar {
             display: flex;
             justify-content: space-between;
@@ -456,7 +453,7 @@
             color: var(--cyan);
         }
 
-        /* Стили для ПОЛНОЭКРАННОГО режима */
+        /* fullscreen styles */
         body.fullscreen-active {
             background: #000 !important;
             padding: 0 !important;
@@ -500,7 +497,7 @@
             display: none !important;
         }
 
-        /* Плавающий индикатор закрытия фуллскрина */
+        /* exit btn */
         .exit-fullscreen-btn {
             display: none;
             position: fixed;
@@ -540,7 +537,7 @@
             100% { opacity: 0.8; transform: scale(1); }
         }
 
-        /* Адаптивность для мобильных телефонов */
+        /* responsive */
         @media (max-width: 992px) {
             main {
                 grid-template-columns: 1fr;
@@ -569,7 +566,7 @@
             </svg>
             <div class="logo-text">
                 <h1>SCREEN DEFECT MAPPER</h1>
-                <span>STATUS: STABLE_INTELLIGENCE</span>
+                <span>status: active</span>
             </div>
         </div>
         <div class="system-status">
@@ -585,9 +582,9 @@
     </header>
 
     <main>
-        <!-- Боковая панель -->
+        <!-- боковая панель -->
         <section class="sidebar">
-            <!-- Блок Разрешения -->
+            <!-- блок разрешения -->
             <div class="card">
                 <h2>📐 Разрешение экрана</h2>
                 <div class="grid-presets">
@@ -605,7 +602,7 @@
                 </div>
             </div>
 
-            <!-- Блок Действий -->
+            <!-- блок действий -->
             <div class="card">
                 <h2>🛠️ Управление</h2>
                 <div class="actions-vertical">
@@ -628,7 +625,7 @@
                 </div>
             </div>
 
-            <!-- Блок экспорта / Лог координат -->
+            <!-- блок экспорта / лог координат -->
             <div class="card coords-log">
                 <h2>📋 Векторные точки</h2>
                 <div class="coords-table-wrapper">
@@ -642,7 +639,7 @@
                             </tr>
                         </thead>
                         <tbody id="points-tbody">
-                            <!-- Заполняется динамически -->
+                            <!-- заполняется динамически -->
                         </tbody>
                     </table>
                     <div class="empty-log" id="empty-table-view">
@@ -657,7 +654,7 @@
             </div>
         </section>
 
-        <!-- Рабочее пространство -->
+        <!-- рабочее пространство -->
         <section class="workspace">
             <div class="canvas-section" id="canvas-container">
                 <button class="exit-fullscreen-btn" id="btn-exit-fullscreen">
@@ -683,19 +680,19 @@
     </main>
 
     <script>
-        // Инициализация элементов DOM
+        // dom elements
         const canvas = document.getElementById('calibration-canvas');
         const ctx = canvas.getContext('2d');
         const monitorFrame = document.getElementById('monitor-frame');
         const canvasContainer = document.getElementById('canvas-container');
         const ratioBadge = document.getElementById('ratio-badge');
         
-        // Вводы разрешений
+        // inputs
         const inputW = document.getElementById('custom-w');
         const inputH = document.getElementById('custom-h');
         const presetBtns = document.querySelectorAll('.btn-preset');
         
-        // Кнопки управления
+        // controls
         const btnFullscreen = document.getElementById('btn-fullscreen');
         const btnExitFullscreen = document.getElementById('btn-exit-fullscreen');
         const btnCloseLoop = document.getElementById('btn-close-loop');
@@ -704,38 +701,38 @@
         const btnExportJson = document.getElementById('btn-export-json');
         const btnExportCsv = document.getElementById('btn-export-csv');
         
-        // Тексты статусов
+        // status indicator
         const stateDot = document.getElementById('state-dot');
         const stateText = document.getElementById('state-text');
         const realtimeCoordsText = document.getElementById('realtime-coords');
         
-        // Таблица
+        // table rows
         const pointsTbody = document.getElementById('points-tbody');
         const emptyTableView = document.getElementById('empty-table-view');
 
-        // Глобальное состояние
+        // global state
         let virtualWidth = 1920;
         let virtualHeight = 1080;
         
-        let completedPolygons = []; // Содержит массивы точек для замкнутых многоугольников: [ [{x, y}, ...], ... ]
-        let currentPoints = [];     // Массив точек текущего (незавершенного) контура: [ {x, y}, ... ]
+        let completedPolygons = []; // array of completed polygons
+        let currentPoints = [];     // current active path
         
         let mouseX = 0;
         let mouseY = 0;
         let isHovering = false;
 
-        // Инициализация размеров и рендеринга
+        // init
         function initDimensions() {
             virtualWidth = parseInt(inputW.value) || 1920;
             virtualHeight = parseInt(inputH.value) || 1080;
             
-            // Расчет пропорций
+            // calculate proportions
             const gcd = (a, b) => b ? gcd(b, a % b) : a;
             const divisor = gcd(virtualWidth, virtualHeight);
             const ratioW = virtualWidth / divisor;
             const ratioH = virtualHeight / divisor;
             
-            // Если отношение слишком дробное, показываем округленные стандартные
+            // fallback to standard ratio if too precise
             let ratioString = `${ratioW}:${ratioH}`;
             if (ratioW > 50 || ratioH > 50) {
                 const decimal = (virtualWidth / virtualHeight).toFixed(2);
@@ -746,10 +743,10 @@
             }
             ratioBadge.textContent = ratioString;
             
-            // Выставляем пропорции и размеры для монитора
+            // set aspect ratio
             monitorFrame.style.aspectRatio = `${virtualWidth} / ${virtualHeight}`;
             
-            // Выставляем разрешение холста 1:1
+            // set canvas resolution
             canvas.width = virtualWidth;
             canvas.height = virtualHeight;
             
@@ -757,13 +754,13 @@
             redraw();
         }
 
-        // Адаптивное масштабирование контейнера с рамкой монитора
+        // resize container
         function updateCanvasContainerSize() {
-            // Временно сжимаем рамку до 0, чтобы получить чистые размеры флекс-контейнера без влияния его детей
+            // reset dimensions to calculate clean bounds
             monitorFrame.style.width = '0px';
             monitorFrame.style.height = '0px';
             
-            const containerW = canvasContainer.clientWidth - 64; // с учетом отступов
+            const containerW = canvasContainer.clientWidth - 64; // padding offset
             const containerH = canvasContainer.clientHeight - 64;
             
             const containerRatio = containerW / containerH;
@@ -778,35 +775,35 @@
             }
         }
 
-        // Логика пересчета физических координат мыши на холсте в виртуальные пиксели
+        // mouse to virtual scale
         function getCanvasCoordinates(e) {
             const rect = canvas.getBoundingClientRect();
             
-            // Масштабируем с учетом реального разрешения холста
+            // scale
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
             
             const x = Math.round((e.clientX - rect.left) * scaleX);
             const y = Math.round((e.clientY - rect.top) * scaleY);
             
-            // Ограничиваем рамками холста
+            // clamp to bounds
             return {
                 x: Math.max(0, Math.min(virtualWidth, x)),
                 y: Math.max(0, Math.min(virtualHeight, y))
             };
         }
 
-        // Проверка дистанции между двумя точками
+        // distance helper
         function getDistance(p1, p2) {
             return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
         }
 
-        // Отрисовка
+        // draw everything
         function redraw() {
-            // Очищаем экран
+            // clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Сетка пикселей (тонкие линии)
+            // grid lines
             ctx.strokeStyle = 'rgba(102, 252, 241, 0.03)';
             ctx.lineWidth = 1;
             const gridSpacing = 80;
@@ -822,7 +819,7 @@
             }
             ctx.stroke();
 
-            // 1. Отрисовка завершенных замкнутых многоугольников
+            // 1. finished polygons
             completedPolygons.forEach((poly, index) => {
                 if (poly.length === 0) return;
                 
@@ -833,19 +830,19 @@
                 }
                 ctx.closePath();
                 
-                // Заливка неоновым коралловым
+                // fill path
                 ctx.fillStyle = 'rgba(255, 0, 127, 0.15)';
                 ctx.fill();
                 
-                // Граница
+                // stroke border
                 ctx.strokeStyle = '#ff007f';
                 ctx.lineWidth = 3;
                 ctx.shadowColor = 'rgba(255, 0, 127, 0.5)';
                 ctx.shadowBlur = 10;
                 ctx.stroke();
-                ctx.shadowBlur = 0; // сброс тени
+                ctx.shadowBlur = 0; // reset shadow
 
-                // Опорные точки многоугольника
+                // draw dots
                 poly.forEach(p => {
                     ctx.beginPath();
                     ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
@@ -857,7 +854,7 @@
                 });
             });
 
-            // 2. Отрисовка текущего незавершенного контура
+            // 2. active path
             if (currentPoints.length > 0) {
                 ctx.beginPath();
                 ctx.moveTo(currentPoints[0].x, currentPoints[0].y);
@@ -865,23 +862,23 @@
                     ctx.lineTo(currentPoints[i].x, currentPoints[i].y);
                 }
                 
-                // Если мышка на холсте, рисуем динамическую линию к курсору
+                // dynamic line to cursor
                 if (isHovering && !document.body.classList.contains('fullscreen-active')) {
                     ctx.lineTo(mouseX, mouseY);
                 }
                 
                 ctx.strokeStyle = '#66FCF1';
                 ctx.lineWidth = 2;
-                ctx.setLineDash([4, 4]); // пунктир для строящейся линии
+                ctx.setLineDash([4, 4]); // dashed stroke
                 ctx.stroke();
-                ctx.setLineDash([]); // сброс пунктира
+                ctx.setLineDash([]); // reset dash
                 
-                // Опорные точки текущего контура
+                // active dots
                 currentPoints.forEach((p, idx) => {
                     ctx.beginPath();
                     ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
                     
-                    // Самая первая точка светится неоном ярче (подсказка автозамыкания)
+                    // highlight first dot for closing snap
                     if (idx === 0) {
                         ctx.fillStyle = '#66FCF1';
                         ctx.shadowColor = 'rgba(102, 252, 241, 0.8)';
@@ -889,7 +886,7 @@
                         ctx.fill();
                         ctx.shadowBlur = 0;
                         
-                        // Дополнительное кольцо вокруг стартовой точки
+                        // outer ring guide
                         ctx.beginPath();
                         ctx.arc(p.x, p.y, 12, 0, Math.PI * 2);
                         ctx.strokeStyle = 'rgba(102, 252, 241, 0.3)';
@@ -905,31 +902,31 @@
                 });
             }
 
-            // 3. Перекрестие под курсором (Crosshairs) для точности
+            // 3. crosshair lines
             if (isHovering && !document.body.classList.contains('fullscreen-active')) {
                 ctx.strokeStyle = 'rgba(102, 252, 241, 0.2)';
                 ctx.lineWidth = 0.75;
                 
-                // Вертикальная линия
+                // vertical line
                 ctx.beginPath();
                 ctx.moveTo(mouseX, 0);
                 ctx.lineTo(mouseX, canvas.height);
                 ctx.stroke();
                 
-                // Горизонтальная линия
+                // horizontal line
                 ctx.beginPath();
                 ctx.moveTo(0, mouseY);
                 ctx.lineTo(canvas.width, mouseY);
                 ctx.stroke();
 
-                // Подсказка координат прямо у курсора
+                // coordinates tooltip
                 ctx.font = '12px Share Tech Mono';
                 ctx.fillStyle = '#66FCF1';
                 ctx.fillText(`X:${mouseX} Y:${mouseY}`, mouseX + 15, mouseY - 15);
             }
         }
 
-        // Замыкание текущей цепи в полноценный полигон
+        // close active loop
         function closeActiveLoop() {
             if (currentPoints.length < 3) return;
             
@@ -941,7 +938,7 @@
             redraw();
         }
 
-        // Обновление состояния кнопок и статусов
+        // toggle buttons
         function updateControlsState() {
             const hasCurrentPoints = currentPoints.length > 0;
             const hasCompletedPolygons = completedPolygons.length > 0;
@@ -964,7 +961,7 @@
             }
         }
 
-        // Обновление таблицы точек
+        // render table rows
         function updatePointsTable() {
             pointsTbody.innerHTML = '';
             
@@ -978,44 +975,34 @@
             emptyTableView.style.display = 'none';
             let index = 1;
             
-            // Вывод завершенных полигонов
+            // completed polygon items
             completedPolygons.forEach((poly, polyIdx) => {
                 poly.forEach((p, ptIdx) => {
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${index++}</td>
-                        <td>${p.x}</td>
-                        <td>${p.y}</td>
-                        <td style="color: var(--pink);">Фигура #${polyIdx + 1} (${ptIdx === 0 ? 'Старт' : 'Точка'})</td>
-                    `;
+                    tr.innerHTML = `\n                        <td>${index++}</td>\n                        <td>${p.x}</td>\n                        <td>${p.y}</td>\n                        <td style="color: var(--pink);">Фигура #${polyIdx + 1} (${ptIdx === 0 ? 'Старт' : 'Точка'})</td>\n                    `;
                     pointsTbody.appendChild(tr);
                 });
             });
             
-            // Вывод текущих незавершенных точек
+            // active path items
             currentPoints.forEach((p, ptIdx) => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${index++}</td>
-                    <td>${p.x}</td>
-                    <td>${p.y}</td>
-                    <td style="color: var(--cyan);">Активный путь (${ptIdx === 0 ? 'Старт' : 'Точка'})</td>
-                `;
+                tr.innerHTML = `\n                    <td>${index++}</td>\n                    <td>${p.x}</td>\n                    <td>${p.y}</td>\n                    <td style="color: var(--cyan);">Активный путь (${ptIdx === 0 ? 'Старт' : 'Точка'})</td>\n                `;
                 pointsTbody.appendChild(tr);
             });
         }
 
-        // ОБРАБОТЧИКИ СОБЫТИЙ
+        // event listeners
 
-        // Клик по холсту (добавление точки / автозамыкание)
+        // canvas click handler
         canvas.addEventListener('click', (e) => {
             const coords = getCanvasCoordinates(e);
             
-            // Проверяем автозамыкание: клик в радиусе 16 пикселей от первой точки
+            // check snap distance to start point
             if (currentPoints.length >= 3) {
                 const startPoint = currentPoints[0];
                 
-                // Пересчитываем 16 пикселей в физический масштаб холста
+                // scale threshold
                 const rect = canvas.getBoundingClientRect();
                 const threshold = 16 * (canvas.width / rect.width);
                 
@@ -1025,14 +1012,14 @@
                 }
             }
             
-            // Добавляем точку
+            // add point
             currentPoints.push(coords);
             updateControlsState();
             updatePointsTable();
             redraw();
         });
 
-        // Движение мыши над холстом
+        // canvas mousemove
         canvas.addEventListener('mousemove', (e) => {
             const coords = getCanvasCoordinates(e);
             mouseX = coords.x;
@@ -1048,7 +1035,7 @@
             redraw();
         });
 
-        // Отмена последней точки
+        // undo point
         btnUndo.addEventListener('click', () => {
             if (currentPoints.length > 0) {
                 currentPoints.pop();
@@ -1058,10 +1045,10 @@
             }
         });
 
-        // Замыкание контура кнопкой
+        // close active loop btn
         btnCloseLoop.addEventListener('click', closeActiveLoop);
 
-        // Очистить всё
+        // clear all data
         btnClear.addEventListener('click', () => {
             if (confirm("Вы уверены, что хотите стереть все векторные данные разметки?")) {
                 currentPoints = [];
@@ -1072,7 +1059,7 @@
             }
         });
 
-        // Обработка пресетов разрешений
+        // preset buttons
         presetBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 presetBtns.forEach(b => b.classList.remove('active'));
@@ -1084,7 +1071,7 @@
             });
         });
 
-        // Кастомное изменение полей
+        // manual inputs
         [inputW, inputH].forEach(input => {
             input.addEventListener('input', () => {
                 presetBtns.forEach(b => b.classList.remove('active'));
@@ -1092,9 +1079,9 @@
             });
         });
 
-        // ЭКСПОРТ ДАННЫХ
+        // data export
 
-        // Генерация чистого JSON-структуры
+        // export model data
         function getDefectsData() {
             return {
                 timestamp: new Date().toISOString(),
@@ -1112,16 +1099,16 @@
         });
 
         btnExportCsv.addEventListener('click', () => {
-            let csvContent = "data:text/csv;charset=utf-8,Type,Index,X,Y\n";
+            let csvContent = "data:text/csv;charset=utf-8,Type,Index,X,Y\\n";
             
             completedPolygons.forEach((poly, polyIdx) => {
                 poly.forEach((p, idx) => {
-                    csvContent += `Polygon_${polyIdx+1},${idx+1},${p.x},${p.y}\n`;
+                    csvContent += `Polygon_${polyIdx+1},${idx+1},${p.x},${p.y}\\n`;
                 });
             });
             
             currentPoints.forEach((p, idx) => {
-                csvContent += `DraftPath,${idx+1},${p.x},${p.y}\n`;
+                csvContent += `DraftPath,${idx+1},${p.x},${p.y}\\n`;
             });
             
             const encodedUri = encodeURI(csvContent);
@@ -1133,7 +1120,7 @@
             document.body.removeChild(link);
         });
 
-        // РЕЖИМ ПОЛНОГО ЭКРАНА (1:1 Калибровка)
+        // fullscreen controls
 
         function enterFullscreen() {
             if (canvasContainer.requestFullscreen) {
@@ -1158,46 +1145,38 @@
         btnFullscreen.addEventListener('click', enterFullscreen);
         btnExitFullscreen.addEventListener('click', exitFullscreen);
 
-        // Слушатель событий изменения состояния Fullscreen
+        // fullscreen change listener
         document.addEventListener('fullscreenchange', onFullscreenChange);
         document.addEventListener('webkitfullscreenchange', onFullscreenChange);
         document.addEventListener('mozfullscreenchange', onFullscreenChange);
         document.addEventListener('MSFullscreenChange', onFullscreenChange);
 
-        // Масштабирование всех точек при динамической смене разрешения
+        // scale points to new resolution
         function scalePoints(oldW, oldH, newW, newH) {
             if (oldW === newW && oldH === newH) return;
             
             const scaleX = newW / oldW;
             const scaleY = newH / oldH;
             
-            // Масштабируем активные незавершенные точки
+            // scale active path
             currentPoints = currentPoints.map(p => ({
                 x: Math.round(p.x * scaleX),
                 y: Math.round(p.y * scaleY)
             }));
             
-            // Масштабируем завершенные многоугольники
-            completedPolygons = completedPolygons.map(poly => 
-                poly.map(p => ({
-                    x: Math.round(p.x * scaleX),
-                    y: Math.round(p.y * scaleY)
-                }))
-            );
+            // scale completed polygons
+            completedPolygons = completedPolygons.map(poly => \n                poly.map(p => ({\n                    x: Math.round(p.x * scaleX),\n                    y: Math.round(p.y * scaleY)\n                }))\n            );
             
             updatePointsTable();
         }
 
         function onFullscreenChange() {
-            const isFullscreen = document.fullscreenElement || 
-                                 document.webkitFullscreenElement || 
-                                 document.mozFullScreenElement || 
-                                 document.msFullscreenElement;
+            const isFullscreen = document.fullscreenElement || \n                                 document.webkitFullscreenElement || \n                                 document.mozFullScreenElement || \n                                 document.msFullscreenElement;
             
             if (isFullscreen) {
                 document.body.classList.add('fullscreen-active');
                 
-                // Автоматически определяем физическое разрешение экрана для режима 1:1
+                // auto detect screen dimensions
                 const newW = window.screen.width || window.innerWidth;
                 const newH = window.screen.height || window.innerHeight;
                 
@@ -1209,10 +1188,10 @@
                 inputW.value = newW;
                 inputH.value = newH;
                 
-                // Масштабируем координаты точек, чтобы они не растягивались и не сдвигались
+                // scale to fit
                 scalePoints(oldW, oldH, newW, newH);
                 
-                // Сбрасываем активные пресеты, так как теперь используется физический экран
+                // clear presets active state
                 presetBtns.forEach(b => b.classList.remove('active'));
                 
                 monitorFrame.style.width = '100vw';
@@ -1224,13 +1203,13 @@
             } else {
                 document.body.classList.remove('fullscreen-active');
                 
-                // Возвращаем стандартные размеры
+                // restore sizes
                 initDimensions();
             }
             redraw();
         }
 
-        // Перерасчет размеров при изменении окна
+        // handle resize
         window.addEventListener('resize', () => {
             if (!document.body.classList.contains('fullscreen-active')) {
                 updateCanvasContainerSize();
@@ -1238,7 +1217,7 @@
             }
         });
 
-        // Инициализация при загрузке
+        // init sizes
         initDimensions();
     </script>
 </body>
