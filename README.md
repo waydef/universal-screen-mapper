@@ -1,72 +1,38 @@
-# 🎯 Universal Screen Defect & Crack Mapper
+# universal-screen-mapper
 
-[English](#english) | [Русский](#русский)
+simple web tool to map physical screen cracks, dead pixels and matrix defects. built on plain HTML5 Canvas and vanilla JS. allows drawing custom vector paths, scaling coordinates to match any monitor/device aspect ratio and resolution, and exporting vector coordinates as JSON or CSV.
 
----
+## features
 
-## English
+- aspect ratio support: presets for standard monitors (16:9), ultrawide (21:9, 32:9) and phones (19.5:9, 20:9), plus manual resolution input.
+- scaling logic: translates physical canvas coordinates to exact virtual pixels so damage mapping is pixel-perfect (1:1).
+- auto-closing paths: automatically snaps and closes polygon path when clicking close to the starting point (within 16px).
+- exports: one-click copy of coordinates as JSON or download as CSV.
+- no dependencies: pure css/js, offline-first.
 
-A premium, highly interactive, and responsive web application designed for mapping screen defects, dead pixel clusters, and physical display cracks across any device—from mobile phones to massive ultrawide desktop monitors. 
+## deployment
 
-Built using pure, high-performance vanilla JavaScript and standard HTML5 Canvas with a futuristic, cyber-inspired dark glassmorphic UI.
-
-### 💎 Key Features
-- **🌐 Device Agnostic:** Built-in resolution presets for any screens:
-  - **Monitors:** 16:9 Standard, 21:9 UltraWide, 32:9 Super UltraWide.
-  - **Smartphones & Tablets:** 19.5:9 (bezel-less phones), 20:9 (modern androids), 16:9 Classic, 4:3 Tablets.
-  - **Custom Dimensions:** Input any custom resolution (width × height in pixels) manually to scale the virtual canvas dynamically.
-- **🪢 Smart Vector Paths with Auto-Closing Loop:**
-  - Standard polygon drawing mode.
-  - **Auto-Closing:** Automatically snaps and closes the path when clicking near the starting point (within 16 physical pixels), or by clicking the "Close Loop" button.
-  - **Neon Zone Highlighting:** Automatically fills completed defects with a semi-translucent neon-pink warning overlay (`rgba(255, 0, 127, 0.15)`) and a glowing red outline to visualize the exact screen damage area.
-  - Supports drawing multiple independent damage zones on a single screen layout.
-- **📱 True Fullscreen 1:1 Calibration Mode:**
-  - Launch immersive desktop/mobile fullscreen to perform pixel-perfect mapping directly on your hardware display.
-- **📥 Live Coordinate Logs & Export:**
-  - An interactive live logs table tracking points, coordinates, and shape indexes.
-  - One-click copy of standard JSON structure for AI or processing integrations.
-  - Quick export to CSV for tabular data storage.
-- **🚀 Ultra Lightweight:** Offline-first architecture, no heavy external JS libraries or styles, loads instantly.
+to deploy on github pages:
+1. go to settings -> pages in your repository.
+2. set source to `deploy from a branch`.
+3. select `main` branch, root folder, and save.
+4. page will be live at `https://<user>.github.io/universal-screen-mapper/`.
 
 ---
 
-## Русский
+# universal-screen-mapper (на русском)
 
-Премиальное высокотехнологичное веб-приложение для точного картирования повреждений дисплея, битых пикселей, слепых зон тачскрина и трещин матрицы на любых устройствах — от мобильных телефонов до сверхшироких мониторов.
+простой инструмент для оцифровки трещин экрана, битых пикселей и дефектов матриц. работает на чистом HTML5 Canvas и ванильном JS. позволяет рисовать контуры, масштабировать координаты под любое физическое разрешение экрана и выгружать данные в JSON или CSV.
 
-Реализовано на чистом высокопроизводительном ванильном JavaScript и HTML5 Canvas в стиле упорядоченного киберпанк-неонового стекла (glassmorphism).
+## фичи
 
-### 💎 Ключевые возможности
-- **🌐 Универсальность пресетов:**
-  - **Мониторы:** 16:9 (FullHD, 2K, 4K), 21:9 UltraWide (3440x1440), 32:9 Super UltraWide (5120x1440).
-  - **Смартфоны:** 19.5:9 (безрамочные iPhone/Honor), 20:9 (современные Android), 16:9 Classic.
-  - **Кастомные размеры:** Ручной ввод любого разрешения по ширине и высоте с мгновенным перерасчетом пропорций виртуального монитора.
-- **🪢 Умные векторные контуры и автозамыкание:**
-  - Стандартное пошаговое нанесение опорных точек.
-  - **Автозамыкание:** Контур замыкается автоматически при клике вблизи стартовой точки (радиус 16 физических пикселей) или по кнопке «Замкнуть контур».
-  - **Неоновая заливка зон повреждения:** Замкнутая область заполняется полупрозрачным неоново-коралловым цветом с пульсирующей обводкой, наглядно визуализируя границы поврежденного участка.
-  - Поддержка создания неограниченного числа независимых контуров на одном экране.
-- **📱 Режим 1:1 «На весь экран»:**
-  - Запуск полноэкранного режима браузера для проведения пиксель-в-пиксель калибровки на физическом мониторе.
-- **📥 Логирование и экспорт данных:**
-  - Живая интерактивная таблица точек с номерами контуров.
-  - Быстрый экспорт полной структуры разметки в формате JSON в один клик.
-  - Экспорт таблицы координат в CSV-файл.
+- поддержка пропорций: пресеты под мониторы (16:9, 21:9, 32:9) и смартфоны (19.5:9, 20:9) + ручной ввод разрешения.
+- точный масштаб 1:1: переводит координаты клика в реальные пиксели выбранного разрешения для точной калибровки.
+- автозамыкание: автоматически стягивает линию в полигон при клике ближе 16 пикселей от начала.
+- экспорт: копирование структуры в JSON или скачивание CSV-файла.
+- без зависимостей: чистый код, загружается мгновенно, работает офлайн.
 
----
+## запуск и деплой
 
-## 🛠️ Installation & Usage / Установка и запуск
-
-### Local Run / Локальный запуск
-1. Clone this repository or download the files.
-2. Simply open `index.html` in any web browser.
----
-1. Склонируйте репозиторий или скачайте файлы проекта.
-2. Запустите файл `index.html` в любом браузере.
-
-### Deploy to GitHub Pages / Деплой на GitHub Pages
-1. Go to your repository settings on GitHub.
-2. Navigate to **Pages** in the left sidebar.
-3. Under **Build and deployment**, set **Source** to `Deploy from a branch`.
-4. Select `main` (or `master`) branch and `/root` folder, then click **Save**.
-5. Your application will be live at `https://<your-username>.github.io/universal-screen-mapper/` in less than a minute!
+1. локально: просто открой `index.html` (в репозитории) в любом браузере.
+2. на github pages: зайди в settings -> pages репозитория, выбери ветку `main` и нажми save.
