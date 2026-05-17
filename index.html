@@ -45,7 +45,9 @@
 
         body {
             background-color: var(--bg-darkest);
-            background-image: \n                radial-gradient(at 0% 0%, rgba(102, 252, 241, 0.05) 0px, transparent 50%),\n                radial-gradient(at 100% 100%, rgba(255, 0, 127, 0.03) 0px, transparent 50%);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(102, 252, 241, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(255, 0, 127, 0.03) 0px, transparent 50%);
             color: var(--text-primary);
             font-family: var(--font-main);
             min-height: 100vh;
@@ -396,7 +398,8 @@
             border: 12px solid #1a222d;
             border-radius: 12px;
             box-shadow: 
-                0 25px 50px -12px rgba(0, 0, 0, 0.8),\n                0 0 40px rgba(102, 252, 241, 0.03);
+                0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                0 0 40px rgba(102, 252, 241, 0.03);
             transition: aspect-ratio var(--transition), width var(--transition), height var(--transition);
             max-width: 100%;
             max-height: 100%;
@@ -980,7 +983,12 @@
             completedPolygons.forEach((poly, polyIdx) => {
                 poly.forEach((p, ptIdx) => {
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `\n                        <td>${index++}</td>\n                        <td>${p.x}</td>\n                        <td>${p.y}</td>\n                        <td style="color: var(--pink);">Фигура #${polyIdx + 1} (${ptIdx === 0 ? 'Старт' : 'Точка'})</td>\n                    `;
+                    tr.innerHTML = `
+                        <td>${index++}</td>
+                        <td>${p.x}</td>
+                        <td>${p.y}</td>
+                        <td style="color: var(--pink);">Фигура #${polyIdx + 1} (${ptIdx === 0 ? 'Старт' : 'Точка'})</td>
+                    `;
                     pointsTbody.appendChild(tr);
                 });
             });
@@ -988,7 +996,12 @@
             // active path items
             currentPoints.forEach((p, ptIdx) => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `\n                    <td>${index++}</td>\n                    <td>${p.x}</td>\n                    <td>${p.y}</td>\n                    <td style="color: var(--cyan);">Активный путь (${ptIdx === 0 ? 'Старт' : 'Точка'})</td>\n                `;
+                tr.innerHTML = `
+                    <td>${index++}</td>
+                    <td>${p.x}</td>
+                    <td>${p.y}</td>
+                    <td style="color: var(--cyan);">Активный путь (${ptIdx === 0 ? 'Старт' : 'Точка'})</td>
+                `;
                 pointsTbody.appendChild(tr);
             });
         }
@@ -1166,13 +1179,21 @@
             }));
             
             // scale completed polygons
-            completedPolygons = completedPolygons.map(poly => \n                poly.map(p => ({\n                    x: Math.round(p.x * scaleX),\n                    y: Math.round(p.y * scaleY)\n                }))\n            );
+            completedPolygons = completedPolygons.map(poly => 
+                poly.map(p => ({
+                    x: Math.round(p.x * scaleX),
+                    y: Math.round(p.y * scaleY)
+                }))
+            );
             
             updatePointsTable();
         }
 
         function onFullscreenChange() {
-            const isFullscreen = document.fullscreenElement || \n                                 document.webkitFullscreenElement || \n                                 document.mozFullScreenElement || \n                                 document.msFullscreenElement;
+            const isFullscreen = document.fullscreenElement || 
+                                 document.webkitFullscreenElement || 
+                                 document.mozFullScreenElement || 
+                                 document.msFullscreenElement;
             
             if (isFullscreen) {
                 document.body.classList.add('fullscreen-active');
