@@ -606,6 +606,27 @@
                 </div>
             </div>
 
+            <!-- блок физических размеров -->
+            <div class="card">
+                <h2>📏 Физические параметры</h2>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+                        <span style="font-size: 0.85rem; color: var(--text-secondary);">Диагональ (дюймы):</span>
+                        <input type="number" id="screen-diagonal" step="0.1" value="27" style="width: 75px; background: rgba(0,0,0,0.25); border: 1px solid rgba(102, 252, 241, 0.15); border-radius: 6px; padding: 0.3rem 0.5rem; color: var(--text-primary); text-align: center; font-family: var(--font-mono); outline: none;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono);">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Плотность пикселей:</span>
+                            <span id="calc-ppi" style="color: var(--cyan);">0 ppi</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Шаг пикселя (Pitch):</span>
+                            <span id="calc-pitch" style="color: var(--cyan);">0 мм</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- блок действий -->
             <div class="card">
                 <h2>🛠️ Управление</h2>
@@ -613,6 +634,10 @@
                     <button class="btn-action btn-primary" id="btn-fullscreen">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 3 6 6-6-6Zm6 0v6-6Zm0 0-6 6 6-6ZM9 21l-6-6 6 6Zm-6 0v-6 6Zm0 0 6-6-6 6ZM3 9l6-6-6 6Zm0-6v6-6Zm0 0 6 6-6-6Zm18 12-6 6 6-6Zm0 6v-6 6Zm0 0-6-6 6 6Z"/></svg>
                         На весь экран (1:1)
+                    </button>
+                    <button class="btn-action btn-secondary" id="btn-pixel-test" style="border-color: var(--cyan-dim); color: var(--cyan);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M9 3v18"/><path d="M15 3v18"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>
+                        Тест пикселей
                     </button>
                     <button class="btn-action btn-secondary" id="btn-close-loop" disabled>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"/><path d="m9 12 2 2 4-4"/></svg>
@@ -695,6 +720,9 @@
         const inputW = document.getElementById('custom-w');
         const inputH = document.getElementById('custom-h');
         const presetBtns = document.querySelectorAll('.btn-preset');
+        const inputDiagonal = document.getElementById('screen-diagonal');
+        const calcPpi = document.getElementById('calc-ppi');
+        const calcPitch = document.getElementById('calc-pitch');
         
         // controls
         const btnFullscreen = document.getElementById('btn-fullscreen');
@@ -704,6 +732,7 @@
         const btnClear = document.getElementById('btn-clear');
         const btnExportJson = document.getElementById('btn-export-json');
         const btnExportCsv = document.getElementById('btn-export-csv');
+        const btnPixelTest = document.getElementById('btn-pixel-test');
         
         // status indicator
         const stateDot = document.getElementById('state-dot');
@@ -724,6 +753,84 @@
         let mouseX = 0;
         let mouseY = 0;
         let isHovering = false;
+
+        // dead pixel checker state
+        let isPixelTestActive = false;
+        const pixelTestColors = ['#ff0000', '#00ff00', '#0000ff', '#ffffff', '#000000'];
+        let pixelTestColorIndex = 0;
+
+        // physical calculator parameters
+        let currentPpi = 0;
+        let pixelPitchMm = 0;
+
+        const diagonalPresets = {
+            "1920x1080": 24,
+            "2560x1440": 27,
+            "3440x1440": 34,
+            "5120x1440": 49,
+            "1080x2400": 6.5,
+            "1179x2556": 6.5
+        };
+
+        function getDiagonalForResolution(w, h) {
+            const key = `${w}x${h}`;
+            return diagonalPresets[key] || 27;
+        }
+
+        function updatePhysicalMetrics() {
+            const diagonal = parseFloat(inputDiagonal.value) || 27;
+            const w = virtualWidth;
+            const h = virtualHeight;
+            
+            if (diagonal <= 0) {
+                calcPpi.textContent = "--- ppi";
+                calcPitch.textContent = "--- мм";
+                currentPpi = 0;
+                pixelPitchMm = 0;
+                return;
+            }
+            
+            currentPpi = Math.sqrt(w * w + h * h) / diagonal;
+            pixelPitchMm = 25.4 / currentPpi;
+            
+            calcPpi.textContent = `${Math.round(currentPpi)} ppi`;
+            calcPitch.textContent = `${pixelPitchMm.toFixed(4)} мм`;
+            
+            updatePointsTable();
+        }
+
+        function calculatePathPhysicalLength(points, isClosed) {
+            if (points.length < 2) return 0;
+            let lengthPx = 0;
+            for (let i = 0; i < points.length - 1; i++) {
+                lengthPx += getDistance(points[i], points[i+1]);
+            }
+            if (isClosed && points.length >= 3) {
+                lengthPx += getDistance(points[points.length - 1], points[0]);
+            }
+            return lengthPx * pixelPitchMm;
+        }
+
+        function formatPhysicalLength(mm) {
+            if (mm <= 0) return "---";
+            if (mm >= 10) {
+                return `${(mm / 10).toFixed(2)} см`;
+            }
+            return `${mm.toFixed(1)} мм`;
+        }
+
+        function togglePixelTest(active) {
+            isPixelTestActive = active !== undefined ? active : !isPixelTestActive;
+            if (isPixelTestActive) {
+                if (!document.body.classList.contains('fullscreen-active')) {
+                    enterFullscreen();
+                }
+                updateControlsState();
+            } else {
+                updateControlsState();
+            }
+            redraw();
+        }
 
         // init
         function initDimensions() {
@@ -755,6 +862,14 @@
             canvas.height = virtualHeight;
             
             updateCanvasContainerSize();
+
+            // auto detect diagonal for preset
+            const autoDiag = getDiagonalForResolution(virtualWidth, virtualHeight);
+            if (autoDiag) {
+                inputDiagonal.value = autoDiag;
+            }
+
+            updatePhysicalMetrics();
             redraw();
         }
 
@@ -807,6 +922,12 @@
             // clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
+            if (isPixelTestActive) {
+                ctx.fillStyle = pixelTestColors[pixelTestColorIndex];
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+
             // grid lines
             ctx.strokeStyle = 'rgba(102, 252, 241, 0.03)';
             ctx.lineWidth = 1;
@@ -981,26 +1102,30 @@
             
             // completed polygon items
             completedPolygons.forEach((poly, polyIdx) => {
+                const polyLengthMm = calculatePathPhysicalLength(poly, true);
+                const polyLenStr = formatPhysicalLength(polyLengthMm);
                 poly.forEach((p, ptIdx) => {
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td>${index++}</td>
                         <td>${p.x}</td>
                         <td>${p.y}</td>
-                        <td style="color: var(--pink);">Фигура #${polyIdx + 1} (${ptIdx === 0 ? 'Старт' : 'Точка'})</td>
+                        <td style="color: var(--pink);">Фигура #${polyIdx + 1} (${ptIdx === 0 ? 'Старт' : 'Точка'}) ${ptIdx === 0 ? `[${polyLenStr}]` : ''}</td>
                     `;
                     pointsTbody.appendChild(tr);
                 });
             });
             
             // active path items
+            const activeLengthMm = calculatePathPhysicalLength(currentPoints, false);
+            const activeLenStr = formatPhysicalLength(activeLengthMm);
             currentPoints.forEach((p, ptIdx) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${index++}</td>
                     <td>${p.x}</td>
                     <td>${p.y}</td>
-                    <td style="color: var(--cyan);">Активный путь (${ptIdx === 0 ? 'Старт' : 'Точка'})</td>
+                    <td style="color: var(--cyan);">Активный путь (${ptIdx === 0 ? 'Старт' : 'Точка'}) ${ptIdx === 0 ? `[${activeLenStr}]` : ''}</td>
                 `;
                 pointsTbody.appendChild(tr);
             });
@@ -1010,6 +1135,12 @@
 
         // canvas click handler
         canvas.addEventListener('click', (e) => {
+            if (isPixelTestActive) {
+                pixelTestColorIndex = (pixelTestColorIndex + 1) % pixelTestColors.length;
+                redraw();
+                return;
+            }
+
             const coords = getCanvasCoordinates(e);
             
             // check snap distance to start point
@@ -1040,7 +1171,14 @@
             mouseY = coords.y;
             isHovering = true;
             
-            realtimeCoordsText.textContent = `X: ${String(mouseX).padStart(4, '0')} | Y: ${String(mouseY).padStart(4, '0')}`;
+            let lengthStr = '';
+            if (currentPoints.length > 0) {
+                const tempPoints = [...currentPoints, coords];
+                const tempLenMm = calculatePathPhysicalLength(tempPoints, false);
+                lengthStr = ` | Длина: ${formatPhysicalLength(tempLenMm)}`;
+            }
+            
+            realtimeCoordsText.textContent = `X: ${String(mouseX).padStart(4, '0')} | Y: ${String(mouseY).padStart(4, '0')}${lengthStr}`;
             redraw();
         });
 
@@ -1093,15 +1231,66 @@
             });
         });
 
+        // physical parameters listeners
+        inputDiagonal.addEventListener('input', updatePhysicalMetrics);
+
+        btnPixelTest.addEventListener('click', () => togglePixelTest());
+
+        // hotkeys
+        window.addEventListener('keydown', (e) => {
+            if (isPixelTestActive) {
+                if (e.key === 'Escape' || e.key === '0') {
+                    togglePixelTest(false);
+                    exitFullscreen();
+                } else if (e.key === '1') {
+                    pixelTestColorIndex = 0;
+                    redraw();
+                } else if (e.key === '2') {
+                    pixelTestColorIndex = 1;
+                    redraw();
+                } else if (e.key === '3') {
+                    pixelTestColorIndex = 2;
+                    redraw();
+                } else if (e.key === '4') {
+                    pixelTestColorIndex = 3;
+                    redraw();
+                } else if (e.key === '5') {
+                    pixelTestColorIndex = 4;
+                    redraw();
+                } else if (e.key === ' ' || e.key === 'Spacebar') {
+                    e.preventDefault();
+                    pixelTestColorIndex = (pixelTestColorIndex + 1) % pixelTestColors.length;
+                    redraw();
+                }
+            }
+        });
+
         // data export
 
         // export model data
         function getDefectsData() {
+            const mappedCompleted = completedPolygons.map((poly, polyIdx) => {
+                const lenMm = calculatePathPhysicalLength(poly, true);
+                return {
+                    id: polyIdx + 1,
+                    physicalLengthCm: parseFloat((lenMm / 10).toFixed(3)),
+                    points: poly
+                };
+            });
+
+            const activeDraft = currentPoints.length > 0 ? {
+                physicalLengthCm: parseFloat((calculatePathPhysicalLength(currentPoints, false) / 10).toFixed(3)),
+                points: currentPoints
+            } : null;
+
             return {
                 timestamp: new Date().toISOString(),
                 canvasSize: { width: virtualWidth, height: virtualHeight },
-                completedDefects: completedPolygons,
-                activeDraftPath: currentPoints
+                screenDiagonalInches: parseFloat(inputDiagonal.value) || 27,
+                screenPpi: Math.round(currentPpi),
+                pixelPitchMm: parseFloat(pixelPitchMm.toFixed(6)),
+                completedDefects: mappedCompleted,
+                activeDraftPath: activeDraft
             };
         }
 
@@ -1113,17 +1302,21 @@
         });
 
         btnExportCsv.addEventListener('click', () => {
-            let csvContent = "data:text/csv;charset=utf-8,Type,Index,X,Y\\n";
+            let csvContent = "data:text/csv;charset=utf-8,Type,Index,X,Y,PhysicalLengthCm\n";
             
             completedPolygons.forEach((poly, polyIdx) => {
+                const lenCm = (calculatePathPhysicalLength(poly, true) / 10).toFixed(3);
                 poly.forEach((p, idx) => {
-                    csvContent += `Polygon_${polyIdx+1},${idx+1},${p.x},${p.y}\\n`;
+                    csvContent += `Polygon_${polyIdx+1},${idx+1},${p.x},${p.y},${idx === 0 ? lenCm : ''}\n`;
                 });
             });
             
-            currentPoints.forEach((p, idx) => {
-                csvContent += `DraftPath,${idx+1},${p.x},${p.y}\\n`;
-            });
+            if (currentPoints.length > 0) {
+                const draftLenCm = (calculatePathPhysicalLength(currentPoints, false) / 10).toFixed(3);
+                currentPoints.forEach((p, idx) => {
+                    csvContent += `DraftPath,${idx+1},${p.x},${p.y},${idx === 0 ? draftLenCm : ''}\n`;
+                });
+            }
             
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
@@ -1224,6 +1417,7 @@
                 canvas.height = newH;
             } else {
                 document.body.classList.remove('fullscreen-active');
+                isPixelTestActive = false;
                 
                 // restore sizes
                 initDimensions();
