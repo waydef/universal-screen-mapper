@@ -1,18 +1,17 @@
 # universal-screen-mapper
 
-Offline web tool for mapping physical screen cracks, dead pixels, and matrix defects. Built on HTML5 Canvas and vanilla JS. Lets you draw custom vector paths, scale coordinates to match any display's aspect ratio/resolution, and export vector coordinates as JSON or CSV.
+an offline web tool designed to map out physical screen cracks, dead pixels, and matrix defects. it lets you trace damage paths on an html5 canvas, scale those coordinates to match any real screen resolution, and export the resulting vector outline as json or csv.
 
-Check out the live page at https://waydef.github.io/universal-screen-mapper/
+try the tool here: https://waydef.github.io/universal-screen-mapper/
 
 ## features
 
-- aspect ratios: presets for standard monitors (16:9), ultrawides (21:9, 32:9), and phones (19.5:9, 20:9), plus manual resolution input.
-- pixel-perfect scaling: translates physical canvas coordinates to exact virtual pixels, keeping the damage mapping 1:1 regardless of browser window size.
-- auto-closing paths: automatically snaps and closes polygon path when clicking close to the starting point (within 16px).
-- exports: one-click copy of coordinates as JSON or download as CSV.
-- no dependencies: pure CSS/JS, offline-first.
+- resolution options: presets for 16:9 monitors, ultrawides (21:9, 32:9), and common phone screens, with an option to enter custom dimensions.
+- 1:1 coordinate mapping: translates canvas clicks to the actual screen pixels, so the coordinates stay accurate no matter your browser window size.
+- snap to close: automatically closes the drawing path when you click within 16 pixels of the starting point.
+- formats: copy the coordinates to your clipboard as a json array or download the data in csv format.
+- client side only: built with plain css and javascript. it requires no external libraries and works completely offline.
 
-## running and deployment
+## how to run
 
-1. locally: open `index.html` in any browser.
-2. github pages: in repository settings -> pages, set source to "deploy from a branch", select "main" branch, root folder, and save.
+just open index.html in a web browser. no setup or local server is needed.
