@@ -700,7 +700,7 @@
                 <div class="controls-info">
                     <div><span class="key-badge">ЛКМ / Тап</span> Поставить точку</div>
                     <div><span class="key-badge">Клик у старта</span> Замкнуть контур</div>
-                    <div><span class="key-badge">F11 / Esc</span> Выйти из режима 1:1</div>
+                    <div><span class="key-badge">Esc</span> Выйти из режима 1:1</div>
                 </div>
                 <div style="font-family: var(--font-mono); color: var(--text-secondary);" id="realtime-coords">
                     X: 0000 | Y: 0000
@@ -710,6 +710,52 @@
     </main>
 
     <script>
+        // <core>
+        // pure helpers without any dom access, tested with node (test/core.test.js)
+        const MAX_SIDE = 16384;
+
+        // a resolution typed by hand: whole number from 1 to MAX_SIDE, otherwise the fallback
+        function clampDimension(value, fallback) {
+            const n = parseInt(value, 10);
+            if (!Number.isFinite(n) || n < 1) return fallback;
+            return Math.min(n, MAX_SIDE);
+        }
+
+        // pixels are numbered 0..size-1, so the last column of a 1920 wide screen is 1919
+        function clampToPixelGrid(value, size) {
+            return Math.max(0, Math.min(size - 1, value));
+        }
+
+        // window.screen reports css pixels; the matrix has devicePixelRatio times as many
+        function physicalScreenSize(cssWidth, cssHeight, ratio) {
+            const r = ratio > 0 ? ratio : 1;
+            return { w: Math.round(cssWidth * r), h: Math.round(cssHeight * r) };
+        }
+
+        // map each pixel to the pixel of the new grid that contains its top left corner;
+        // equal sizes change nothing and a round trip up and back is exact
+        function scalePointList(points, oldW, oldH, newW, newH) {
+            if (oldW === newW && oldH === newH) return points.map(p => ({ x: p.x, y: p.y }));
+            return points.map(p => ({
+                x: clampToPixelGrid(Math.floor(p.x * newW / oldW), newW),
+                y: clampToPixelGrid(Math.floor(p.y * newH / oldH), newH)
+            }));
+        }
+
+        function pathLengthPx(points, isClosed) {
+            if (points.length < 2) return 0;
+            let length = 0;
+            for (let i = 0; i < points.length - 1; i++) {
+                length += Math.hypot(points[i].x - points[i + 1].x, points[i].y - points[i + 1].y);
+            }
+            if (isClosed && points.length >= 3) {
+                const last = points[points.length - 1];
+                length += Math.hypot(last.x - points[0].x, last.y - points[0].y);
+            }
+            return length;
+        }
+        // </core>
+
         // dom elements
         const canvas = document.getElementById('calibration-canvas');
         const ctx = canvas.getContext('2d');
@@ -747,6 +793,12 @@
         // global state
         let virtualWidth = 1920;
         let virtualHeight = 1080;
+        // resolution the stored points are expressed in; it lags behind virtualWidth
+        // while a number is still being typed and is caught up by commitResolution()
+        let pointsWidth = 1920;
+        let pointsHeight = 1080;
+        // resolution chosen by the user before the 1:1 mode replaced it with the real screen
+        let resolutionBeforeFullscreen = null;
         
         let completedPolygons = []; // array of completed polygons
         let currentPoints = [];     // current active path
@@ -773,9 +825,9 @@
             "1179x2556": 6.5
         };
 
+        // only known presets have a diagonal; for anything else the field is left alone
         function getDiagonalForResolution(w, h) {
-            const key = `${w}x${h}`;
-            return diagonalPresets[key] || 27;
+            return diagonalPresets[`${w}x${h}`] || null;
         }
 
         function updatePhysicalMetrics() {
@@ -801,15 +853,7 @@
         }
 
         function calculatePathPhysicalLength(points, isClosed) {
-            if (points.length < 2) return 0;
-            let lengthPx = 0;
-            for (let i = 0; i < points.length - 1; i++) {
-                lengthPx += getDistance(points[i], points[i+1]);
-            }
-            if (isClosed && points.length >= 3) {
-                lengthPx += getDistance(points[points.length - 1], points[0]);
-            }
-            return lengthPx * pixelPitchMm;
+            return pathLengthPx(points, isClosed) * pixelPitchMm;
         }
 
         function formatPhysicalLength(mm) {
@@ -834,9 +878,11 @@
         }
 
         // init
-        function initDimensions() {
-            virtualWidth = parseInt(inputW.value) || 1920;
-            virtualHeight = parseInt(inputH.value) || 1080;
+        // options.commit: move the stored points to the new resolution as well
+        // options.preset: the resolution came from a preset button, so its diagonal applies
+        function initDimensions(options = {}) {
+            virtualWidth = clampDimension(inputW.value, 1920);
+            virtualHeight = clampDimension(inputH.value, 1080);
             
             // calculate proportions
             const gcd = (a, b) => b ? gcd(b, a % b) : a;
@@ -864,14 +910,25 @@
             
             updateCanvasContainerSize();
 
-            // auto detect diagonal for preset
-            const autoDiag = getDiagonalForResolution(virtualWidth, virtualHeight);
-            if (autoDiag) {
-                inputDiagonal.value = autoDiag;
+            // a preset knows its diagonal; typing a resolution must not touch the field
+            if (options.preset) {
+                const presetDiagonal = getDiagonalForResolution(virtualWidth, virtualHeight);
+                if (presetDiagonal) {
+                    inputDiagonal.value = presetDiagonal;
+                }
             }
 
+            if (options.commit) {
+                commitResolution();
+            }
             updatePhysicalMetrics();
             redraw();
+        }
+
+        // bring the points to the current resolution (no-op when they already match)
+        function commitResolution() {
+            if (pointsWidth === virtualWidth && pointsHeight === virtualHeight) return;
+            scalePoints(pointsWidth, pointsHeight, virtualWidth, virtualHeight);
         }
 
         // resize container
@@ -908,8 +965,8 @@
             
             // clamp to bounds
             return {
-                x: Math.max(0, Math.min(virtualWidth, x)),
-                y: Math.max(0, Math.min(virtualHeight, y))
+                x: clampToPixelGrid(x, canvas.width),
+                y: clampToPixelGrid(y, canvas.height)
             };
         }
 
@@ -1142,6 +1199,7 @@
                 return;
             }
 
+            commitResolution();
             const coords = getCanvasCoordinates(e);
             
             // check snap distance to start point
@@ -1220,15 +1278,22 @@
                 
                 inputW.value = btn.dataset.w;
                 inputH.value = btn.dataset.h;
-                initDimensions();
+                initDimensions({ preset: true, commit: true });
             });
         });
 
         // manual inputs
+        // while typing only the canvas follows; the points move once the field is left,
+        // otherwise every keystroke would round them again
         [inputW, inputH].forEach(input => {
             input.addEventListener('input', () => {
                 presetBtns.forEach(b => b.classList.remove('active'));
                 initDimensions();
+            });
+            input.addEventListener('change', () => {
+                inputW.value = clampDimension(inputW.value, 1920);
+                inputH.value = clampDimension(inputH.value, 1080);
+                initDimensions({ commit: true });
             });
         });
 
@@ -1296,6 +1361,7 @@
         }
 
         btnExportJson.addEventListener('click', () => {
+            commitResolution();
             const data = getDefectsData();
             navigator.clipboard.writeText(JSON.stringify(data, null, 2))
                 .then(() => alert("Векторный JSON успешно скопирован в буфер обмена!"))
@@ -1303,6 +1369,7 @@
         });
 
         btnExportCsv.addEventListener('click', () => {
+            commitResolution();
             let csvContent = "data:text/csv;charset=utf-8,Type,Index,X,Y,PhysicalLengthCm\n";
             
             completedPolygons.forEach((poly, polyIdx) => {
@@ -1361,25 +1428,10 @@
 
         // scale points to new resolution
         function scalePoints(oldW, oldH, newW, newH) {
-            if (oldW === newW && oldH === newH) return;
-            
-            const scaleX = newW / oldW;
-            const scaleY = newH / oldH;
-            
-            // scale active path
-            currentPoints = currentPoints.map(p => ({
-                x: Math.round(p.x * scaleX),
-                y: Math.round(p.y * scaleY)
-            }));
-            
-            // scale completed polygons
-            completedPolygons = completedPolygons.map(poly => 
-                poly.map(p => ({
-                    x: Math.round(p.x * scaleX),
-                    y: Math.round(p.y * scaleY)
-                }))
-            );
-            
+            currentPoints = scalePointList(currentPoints, oldW, oldH, newW, newH);
+            completedPolygons = completedPolygons.map(poly => scalePointList(poly, oldW, oldH, newW, newH));
+            pointsWidth = newW;
+            pointsHeight = newH;
             updatePointsTable();
         }
 
@@ -1392,12 +1444,20 @@
             if (isFullscreen) {
                 document.body.classList.add('fullscreen-active');
                 
-                // auto detect screen dimensions
-                const newW = window.screen.width || window.innerWidth;
-                const newH = window.screen.height || window.innerHeight;
+                // the real screen in matrix pixels: window.screen is in css pixels
+                const physical = physicalScreenSize(
+                    window.screen.width || window.innerWidth,
+                    window.screen.height || window.innerHeight,
+                    window.devicePixelRatio
+                );
+                const newW = physical.w;
+                const newH = physical.h;
                 
-                const oldW = virtualWidth;
-                const oldH = virtualHeight;
+                // remember what the user picked, to give it back on exit
+                commitResolution();
+                if (!resolutionBeforeFullscreen) {
+                    resolutionBeforeFullscreen = { w: virtualWidth, h: virtualHeight };
+                }
                 
                 virtualWidth = newW;
                 virtualHeight = newH;
@@ -1405,7 +1465,7 @@
                 inputH.value = newH;
                 
                 // scale to fit
-                scalePoints(oldW, oldH, newW, newH);
+                scalePoints(pointsWidth, pointsHeight, newW, newH);
                 
                 // clear presets active state
                 presetBtns.forEach(b => b.classList.remove('active'));
@@ -1420,8 +1480,13 @@
                 document.body.classList.remove('fullscreen-active');
                 isPixelTestActive = false;
                 
-                // restore sizes
-                initDimensions();
+                // give back the resolution the user had chosen, the points follow it
+                if (resolutionBeforeFullscreen) {
+                    inputW.value = resolutionBeforeFullscreen.w;
+                    inputH.value = resolutionBeforeFullscreen.h;
+                    resolutionBeforeFullscreen = null;
+                }
+                initDimensions({ commit: true });
             }
             redraw();
         }
